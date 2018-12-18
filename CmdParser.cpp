@@ -35,17 +35,17 @@ CmdParser::check(void) {
     rc = Serial.read();
     read++;
     if (! newData) {
-      if (rc != '\n') {
-        if (idx < maxBufferLength) {
-	  inBuffer[idx++] = rc;
-        }
-      }
-      else {
+      if (rc == '\n' || rc == '\r' ) {
         inBuffer[idx] = 0;
 	if (idx > 0) {
 	  newData = true;
 	}
 	break;
+      }
+      else {
+        if (idx < maxBufferLength) {
+	  inBuffer[idx++] = rc;
+        }
       }
     }
   }
