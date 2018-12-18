@@ -7,51 +7,63 @@
 #include "Arduino.h"
 #include "CmdParser.h"
 
-CmdParser::CmdParser(parserCB pfunc)
+CmdParser::CmdParser(parserCB pfunc, boolean prompt, boolean echo)
 {
   _parserCB = pfunc;
+  _prompt = prompt;
+  _echo = echo;
 }
 
-CmdParser::init(void)
+CmdParser::init(boolean verbose)
 {
-  Serial.begin (9600);
-  while (!Serial) {
-    ;
+  if (verbose) {
+    Serial.println ("Simple command line parser (v1.0)");
   }
-  Serial.println ("Simple command line parser (v1.0)");
-  Serial.print ("> ");
+  if (_prompt) {
+    Serial.print ("> ");
+  }
   inBuffer[0] = inBuffer[maxBufferLength] = 0;
 }
 
 CmdParser::check(void) {
-  byte rc;
+  byte rc, read;
   static boolean newData = false;
   static byte idx = 0;
 
-  while (Serial.available() > 0) {
+  read = 0;
+  while (read < maxBufferLength && Serial.available() > 0) {
     rc = Serial.read();
+    read++;
     if (! newData) {
       if (rc != '\n') {
-        inBuffer[idx++] = rc;
-        if (idx >= maxBufferLength) {
-          idx--;
+        if (idx < maxBufferLength) {
+	  inBuffer[idx++] = rc;
         }
       }
       else {
         inBuffer[idx] = 0;
-        idx = 0;
-        newData = true;
+	if (idx > 0) {
+	  newData = true;
+	}
 	break;
       }
     }
   }
 
   if (newData) {
-    Serial.println (inBuffer);
-    if (0 != _parserCB(inBuffer)) {
+    if (_echo) {
+      Serial.println (inBuffer);
+    }
+    else {
+      Serial.println ("");
+    }
+    if (0 != _parserCB(inBuffer, idx)) {
       Serial.println("Syntax error!");
     }
     newData = false;
-    Serial.print ("> ");
+    idx = 0;
+    if (_prompt) {
+      Serial.print ("> ");
+    }
   }
 }

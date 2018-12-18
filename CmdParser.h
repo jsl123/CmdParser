@@ -8,19 +8,21 @@
 
 #include "Arduino.h"
 
-typedef int (*parserCB)(char *);
+typedef int (*parserCB)(char *, int);
 
 class CmdParser
 {
   public:
-    CmdParser(parserCB);
-    init();
+    CmdParser(parserCB, boolean = true, boolean = true);
+    init(boolean);
     check();
   private:
     parserCB _parserCB;
     const static int maxBufferLength = 31;
     char inBuffer[maxBufferLength + 1];
     boolean newData;
+    boolean _prompt;
+    boolean _echo;
 };
 
 #endif
