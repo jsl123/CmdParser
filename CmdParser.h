@@ -14,8 +14,9 @@ class CmdParser
 {
   public:
     CmdParser(parserCB, boolean = true, boolean = true);
-    init(boolean);
-    check();
+    void init(boolean);
+    void loop(void);
+    const String version(void);
   private:
     parserCB _parserCB;
     const static int maxBufferLength = 31;
@@ -23,6 +24,7 @@ class CmdParser
     boolean newData;
     boolean _prompt;
     boolean _echo;
+    const String _version = "1.1";
 };
 
 #endif

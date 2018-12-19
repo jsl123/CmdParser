@@ -14,10 +14,12 @@ CmdParser::CmdParser(parserCB pfunc, boolean prompt, boolean echo)
   _echo = echo;
 }
 
-CmdParser::init(boolean verbose)
+void CmdParser::init(boolean verbose)
 {
   if (verbose) {
-    Serial.println ("Simple command line parser (v1.0)");
+    Serial.print ("Simple command line parser (v");
+    Serial.print (_version);
+    Serial.println (")");
   }
   if (_prompt) {
     Serial.print ("> ");
@@ -25,7 +27,7 @@ CmdParser::init(boolean verbose)
   inBuffer[0] = inBuffer[maxBufferLength] = 0;
 }
 
-CmdParser::check(void) {
+void CmdParser::loop(void) {
   byte rc, read;
   static boolean newData = false;
   static byte idx = 0;
@@ -66,4 +68,8 @@ CmdParser::check(void) {
       Serial.print ("> ");
     }
   }
+}
+
+const String CmdParser::version(void) {
+  return _version;
 }
