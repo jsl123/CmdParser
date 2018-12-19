@@ -8,15 +8,17 @@
 
 #include "Arduino.h"
 
-typedef int (*parserCB)(char *, int);
+typedef int (*parserCB)(int, int);
+typedef struct {char *name, int parser_type, int command} cmd_table_t;
 
 class CmdParser
 {
   public:
     CmdParser(parserCB, boolean = true, boolean = true);
-    void init(boolean);
+    void init(cmd_table_t cmd_table*, boolean);
     void loop(void);
-    const String version(void);
+    const String GetVersion(void);
+    const enum {PARSER_WORD, PARSER_WORD_INT} type;
   private:
     parserCB _parserCB;
     const static int maxBufferLength = 31;

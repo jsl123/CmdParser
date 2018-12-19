@@ -59,9 +59,9 @@ void CmdParser::loop(void) {
     else {
       Serial.println ("");
     }
-    if (0 != _parserCB(inBuffer, idx)) {
-      Serial.println("Syntax error!");
-    }
+    // if (0 != _parserCB(inBuffer, idx)) {
+    //   Serial.println("Syntax error!");
+    // }
     newData = false;
     idx = 0;
     if (_prompt) {
@@ -70,6 +70,6 @@ void CmdParser::loop(void) {
   }
 }
 
-const String CmdParser::version(void) {
+const String CmdParser::GetVersion(void) {
   return _version;
 }
