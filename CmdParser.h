@@ -9,21 +9,28 @@
 #include "Arduino.h"
 
 typedef int (*parserCB)(int, int);
-typedef struct {char *name, int parser_type, int command} cmd_table_t;
+struct cmd_table_t {
+  char *name;
+  int parser_type;
+  int command;
+};
 
 class CmdParser
 {
   public:
-    CmdParser(parserCB, boolean = true, boolean = true);
-    void init(cmd_table_t cmd_table*, boolean);
+    CmdParser(parserCB, struct cmd_table_t *,
+	      boolean = true, boolean = true, boolean = true);
+    void init(void);
     void loop(void);
     const String GetVersion(void);
-    const enum {PARSER_WORD, PARSER_WORD_INT} type;
+    const enum {PARSER_END, PARSER_WORD, PARSER_WORD_INT} type;
   private:
     parserCB _parserCB;
+    struct cmd_table_t *_cmd_table;
     const static int maxBufferLength = 31;
     char inBuffer[maxBufferLength + 1];
     boolean newData;
+    boolean _verbose;
     boolean _prompt;
     boolean _echo;
     const String _version = "1.1";

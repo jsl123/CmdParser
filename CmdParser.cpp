@@ -7,16 +7,19 @@
 #include "Arduino.h"
 #include "CmdParser.h"
 
-CmdParser::CmdParser(parserCB pfunc, boolean prompt, boolean echo)
+CmdParser::CmdParser(parserCB pfunc, struct cmd_table_t *cmd_table,
+		     boolean verbose, boolean prompt, boolean echo)
 {
   _parserCB = pfunc;
+  _cmd_table = cmd_table;
+  _verbose = verbose;
   _prompt = prompt;
   _echo = echo;
 }
 
-void CmdParser::init(boolean verbose)
+void CmdParser::init(void)
 {
-  if (verbose) {
+  if (_verbose) {
     Serial.print ("Simple command line parser (v");
     Serial.print (_version);
     Serial.println (")");
@@ -59,9 +62,49 @@ void CmdParser::loop(void) {
     else {
       Serial.println ("");
     }
-    // if (0 != _parserCB(inBuffer, idx)) {
-    //   Serial.println("Syntax error!");
-    // }
+
+    // Lookup 'idx' bytes in 'inBuffer' in '_cmd_table'
+    int integer1;
+    struct cmd_table_t *pc = _cmd_table;
+
+    for (pc = _cmd_table; pc->name && strlen (pc->name) > 0; pc++) {
+      integer1 = 0;
+
+      if (0 == strncmp(inBuffer, pc->name,
+		       min(strlen(inBuffer), strlen (pc->name)))) {
+	switch (pc->parser_type) {
+	case PARSER_WORD:
+	  l = strlen (inBuffer);
+	  break;
+	  
+	case PARSER_WORD_INT:
+	  l = strlen (pc->name) + 1;
+	  if (strlen (inBuffer) < (l+1) || inBuffer[l-1] != ' ') {
+	    if (_verbose) {
+	      Serial.println("Parameter error");
+	    }
+	    continue;
+	  }
+	  else {
+	    integer1 = atoi (inBuffer + l);
+	  }
+	  break;
+	  
+	case PARSER_END: // fall-through
+	default:
+	  if (_verbose) {
+	    Serial.println("Command not found or implemented");
+	  }
+	  continue;
+	}
+	
+	if (0 != _parserCB(pc->command, integer1)) {
+	  if (_verbose) {
+	    Serial.println("Command failed");
+	  }
+	}
+      }
+    }
     newData = false;
     idx = 0;
     if (_prompt) {
